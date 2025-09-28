@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý sản phẩm</title>
+</head>
+<body>
+    <h1>Danh sách sản phẩm</h1>
+    <div id="productList"></div>
+    <button onclick="loadProducts()">Tải sản phẩm</button>
+    <button onclick="loadProductsByCategory()">Tải sản phẩm theo danh mục</button>
+
+    <script>
+        async function loadProducts() {
+            const response = await fetch('http://localhost:8080/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `
+                        query {
+                            allProducts {
+                                id
+                                title
+                                price
+                                amount
+                            }
+                        }
+                    `
+                })
+            });
+            const result = await response.json();
+            displayProducts(result.data.allProducts);
+        }
+
+        async function loadProductsByCategory() {
+            const categoryId = prompt("Nhập ID danh mục:");
+            const response = await fetch('http://localhost:8080/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `
+                        query {
+                            productsByCategoryId(categoryId: ${categoryId}) {
+                                id
+                                title
+                                price
+                                amount
+                            }
+                        }
+                    `
+                })
+            });
+            const result = await response.json();
+            displayProducts(result.data.productsByCategoryId);
+        }
+
+        function displayProducts(products) {
+            const list = document.getElementById('productList');
+            list.innerHTML = '';
+            products.forEach(product => {
+                list.innerHTML += `<p>ID: ${product.id}, Tên: ${product.title}, Giá: ${product.price}, Số lượng: ${product.amount}</p>`;
+            });
+        }
+    </script>
+</body>
+</html>
